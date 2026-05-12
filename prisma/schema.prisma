@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Mesa {
+  id          Int       @id @default(autoincrement())
+  numero      Int       @unique
+  capacidad   Int
+  ubicacion   String?
+  disponible  Boolean   @default(true)
+
+  reservas    Reserva[]
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Reserva {
+  id               Int       @id @default(autoincrement())
+
+  nombreCliente    String
+  telefono         String
+  email            String?
+
+  cantidadPersonas Int
+  fechaHoraInicio  DateTime
+  fechaHoraFin     DateTime
+
+  estado           EstadoReserva @default(PENDIENTE)
+
+  mesaId           Int
+  mesa             Mesa      @relation(fields: [mesaId], references: [id])
+
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+enum EstadoReserva {
+  PENDIENTE
+  CONFIRMADA
+  CANCELADA
+  FINALIZADA
+}
