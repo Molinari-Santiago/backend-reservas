@@ -3,6 +3,7 @@ import cors from "cors";
 
 import mesasRoutes from "./routes/mesas.routes.js";
 import reservasRoutes from "./routes/reservas.routes.js";
+import productosRoutes from "./routes/productos.routes.js";
 
 const app = express();
 
@@ -17,5 +18,6 @@ app.get("/", (req, res) => {
 
 app.use("/api/mesas", mesasRoutes);
 app.use("/api/reservas", reservasRoutes);
+app.use("/api/productos", productosRoutes);
 
 export default app;
