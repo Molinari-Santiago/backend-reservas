@@ -149,3 +149,73 @@ export const obtenerMesasDisponibles = async (req, res) => {
     });
   }
 };
+
+export const obtenerEstadoMesas = async (req, res) => {
+  try {
+    const ahora = new Date();
+
+    const mesas = await prisma.mesa.findMany({
+      include: {
+        pedidos: {
+          where: {
+            estado: "ABIERTO"
+          }
+        },
+      reservas: {
+  where: {
+    estado: {
+      in: ["PENDIENTE", "CONFIRMADA"]
+    },
+    fechaHoraInicio: {
+      lte: ahora
+    },
+    fechaHoraFin: {
+      gt: ahora
+    }
+  },
+  orderBy: {
+    fechaHoraInicio: "asc"
+  }
+}
+      },
+      orderBy: {
+        numero: "asc"
+      }
+    });
+
+    const mesasConEstado = mesas.map((mesa) => {
+      let estadoActual = "LIBRE";
+
+      if (!mesa.disponible) {
+        estadoActual = "FUERA_DE_SERVICIO";
+      } else if (mesa.pedidos.length > 0) {
+        estadoActual = "OCUPADA";
+      } else if (mesa.reservas.length > 0) {
+        estadoActual = "RESERVADA";
+      }
+
+      return {
+        id: mesa.id,
+        numero: mesa.numero,
+        capacidad: mesa.capacidad,
+        ubicacion: mesa.ubicacion,
+        disponible: mesa.disponible,
+        estadoActual,
+        pedidoAbierto: mesa.pedidos[0] || null,
+        proximaReserva: mesa.reservas[0] || null
+      };
+    });
+
+    res.json({
+      mensaje: "Estado de mesas obtenido correctamente",
+      total: mesasConEstado.length,
+      mesas: mesasConEstado
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      mensaje: "Error al obtener estado de mesas",
+      error: error.message
+    });
+  }
+};

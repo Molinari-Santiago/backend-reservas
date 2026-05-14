@@ -14,6 +14,7 @@ model Mesa {
   disponible  Boolean   @default(true)
 
   reservas    Reserva[]
+  pedidos     Pedido[]
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -48,8 +49,41 @@ model Producto {
   imagenUrl   String?
   disponible  Boolean  @default(true)
 
+  detalles    DetallePedido[]
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Pedido {
+  id        Int          @id @default(autoincrement())
+
+  mesaId    Int
+  mesa      Mesa         @relation(fields: [mesaId], references: [id])
+
+  estado    EstadoPedido @default(ABIERTO)
+  total     Float        @default(0)
+
+  detalles  DetallePedido[]
+
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model DetallePedido {
+  id             Int      @id @default(autoincrement())
+
+  pedidoId       Int
+  pedido         Pedido   @relation(fields: [pedidoId], references: [id])
+
+  productoId     Int
+  producto       Producto @relation(fields: [productoId], references: [id])
+
+  cantidad       Int
+  precioUnitario Float
+  subtotal       Float
+
+  createdAt      DateTime @default(now())
 }
 
 enum EstadoReserva {
@@ -57,4 +91,12 @@ enum EstadoReserva {
   CONFIRMADA
   CANCELADA
   FINALIZADA
+}
+
+enum EstadoPedido {
+  ABIERTO
+  EN_PREPARACION
+  ENTREGADO
+  PAGADO
+  CANCELADO
 }
