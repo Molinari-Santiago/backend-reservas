@@ -65,6 +65,7 @@ model Pedido {
   total     Float        @default(0)
 
   detalles  DetallePedido[]
+  factura   Factura?
 
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
@@ -86,6 +87,36 @@ model DetallePedido {
   createdAt      DateTime @default(now())
 }
 
+model Factura {
+  id                  Int      @id @default(autoincrement())
+
+  pedidoId            Int      @unique
+  pedido              Pedido   @relation(fields: [pedidoId], references: [id])
+
+  tipoComprobante     String
+  puntoVenta          Int
+  numeroComprobante   Int?
+
+  concepto            Int      @default(1)
+  tipoDocumento       Int      @default(99)
+  numeroDocumento     String   @default("0")
+
+  importeNeto         Float
+  importeIVA          Float
+  importeTotal        Float
+
+  cae                 String?
+  vencimientoCAE      String?
+  resultadoArca       String?
+  observaciones       String?
+
+  estado              EstadoFactura @default(PENDIENTE)
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+
 enum EstadoReserva {
   PENDIENTE
   CONFIRMADA
@@ -99,4 +130,11 @@ enum EstadoPedido {
   ENTREGADO
   PAGADO
   CANCELADO
+}
+
+enum EstadoFactura {
+  PENDIENTE
+  AUTORIZADA
+  RECHAZADA
+  ANULADA
 }
